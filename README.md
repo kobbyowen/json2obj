@@ -1,4 +1,4 @@
-## MegaJSONObjectMapper
+## JSONObjectMapper
 
 Allows you to transform JSON data into an object whose members can be queried using the member access operator. Unlike `json.dumps` in the standard library that returns a dictionary object, this library returns a JSONObjectMapper object. The attributes of these objects are defined by the contents of the JSON data provided to it
 
