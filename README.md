@@ -7,7 +7,7 @@ Allows you to transform JSON data into an object whose members can be queried us
 ```python
 
 import datetime
-from JSONObjectMapper import JSONObjectMapper
+from json2obj import JSONObjectMapper
 
 person = JSONObjectMapper("""{
         "name" : "trumpowen" ,
