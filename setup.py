@@ -6,7 +6,7 @@ readme_contents = (setup_dir / "README.md").read_text()
 
 setup(
     name="json2obj",
-    version="1.0.0",
+    version="1.0.2",
     description="Convert your JSON data to a valid Python object to allow accessing keys with the member access operator(.)",
     long_description=readme_contents,
     long_description_content_type="text/markdown",
@@ -18,8 +18,8 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
     ],
-    package_dir={"": "json2obj"},
-    packages=find_packages(where="json2obj"),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     python_requires=">=3.6",
     include_package_data=True
 )
