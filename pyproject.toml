@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "json2obj"
+version = "1.2.0"
+description = "Attribute-style access wrapper for JSON-like data with dot-path set/delete and safe defaults"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name="Refactor Bot"}]
+license = {text="MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"  # change to py39/py310/py311 as needed
+extend-exclude = ["build", "dist", ".venv", ".git", ".mypy_cache", ".pytest_cache"]
+
+[tool.ruff.lint]
+# Rule sets: E (pycodestyle), F (pyflakes), I (isort), UP (pyupgrade), B (bugbear),
+# SIM (simplify), PL (pylint-lite), RUF (ruff-specific)
+select = ["E", "F", "I", "UP", "B", "SIM", "PL", "RUF"]
+ignore = ["E501"]  # ignore line-length; if you use Ruff as formatter, you can remove this
+per-file-ignores = { "tests/*" = ["PLR2004"] }  # allow magic numbers in tests
+
+[tool.ruff.format]  # only used if you run "ruff format"
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false

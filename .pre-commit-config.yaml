@@ -1,0 +1,19 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format-wrapper
+        name: Ruff format (non-blocking)
+        language: system
+        entry: bash -c 'ruff format "$@" && git add -- "$@"'
+        pass_filenames: true
+        types: [python]
+        stages: [pre-commit]
+        require_serial: true
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.8
+    hooks:
+      - id: ruff
+        args: []
+        types: [python]
+        stages: [pre-commit]

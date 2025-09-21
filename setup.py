@@ -1,5 +1,6 @@
 import pathlib
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 setup_dir = pathlib.Path(__file__).parent
 readme_contents = (setup_dir / "README.md").read_text()
@@ -21,5 +22,5 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     python_requires=">=3.6",
-    include_package_data=True
+    include_package_data=True,
 )

@@ -1,37 +1,54 @@
-## json2obj
+# json2obj
 
-Allows you to transform JSON data into an object whose members can be queried using the member access operator. Unlike `json.dumps` in the standard library that returns a dictionary object, this library returns a JSONObjectMapper object. The attributes of these objects are defined by the contents of the JSON data provided to it
+**`json2obj`** is a lightweight Python library that lets you interact with JSON data using **attribute-style access** instead of dictionary keys.
 
-## Examples
+It turns JSON objects into `JSONObjectMapper` instances that feel natural to use in Python code, while preserving full JSON compatibility.
 
 ```python
-
-import datetime
 from json2obj import JSONObjectMapper
 
-person = JSONObjectMapper("""{
-        "name" : "trumpowen" ,
-        "age" : 125
-    }""")
-
-person.name == "trumpowen"  # true
-person.age == 125           # true
-
- # replaces and overwrites
-person.name = {}
-person.name.first_name = "Wilkins"
-person.name.last_name = "Owen"
-person.name.other_names = ["Trump"]
-
-# add new attribute. If this is not desired, you can initialize the object with readonly set to True. This will prevent the addition of new attributes and changing the values of existing attributes
-person.dob = datetime(1900, 12, 6)
-
-json_data = str(person) # returns a string representation
-json_as_dict = person.to_dict() # returns a dictionary representation
-
-
+data = {
+    "user": {"name": "Kobby", "age": 29, "skills": ["python", "aws", "forex"]}
+}
+obj = JSONObjectMapper(data)
+print(obj.user.name)        # "Kobby"
+print(obj.user.skills[0])   # "python"
+print(obj.to_json(indent=2))
 ```
 
-## Documentation
+## ✨ Features
 
-Use `help(obj)` , where obj is an instance of JSONObjectMapper
+- Attribute-style access (`obj.key`) for dict keys  
+- Recursive wrapping for nested dicts and lists  
+- Read-only mode (immutability enforced)  
+- Dot/bracket path lookups (`obj.get_path("a.b[0].c")`)  
+- **New:** `set_path()` / `del_path()` for dot paths  
+- **New:** `default_factory` + `autocreate_missing` for safe defaults  
+- Utility methods: `to_dict`, `to_json`, `from_json`, `merge`  
+
+## Install
+```bash
+pip install json2obj
+```
+
+## Quick Start
+```python
+from json2obj import JSONObjectMapper
+
+# Defaults + auto-create
+cfg = JSONObjectMapper({}, default_factory=dict, autocreate_missing=True)
+cfg.profile.settings.theme = "dark"
+assert cfg.get_path("profile.settings.theme") == "dark"
+
+# Path editing
+cfg.set_path("services[0].name", "auth").set_path("services[0].enabled", True)
+cfg.del_path("services[0].name")
+```
+
+## Tests
+```bash
+export PYTHONPATH=src
+python -m unittest discover -s tests -v
+```
+
+MIT License.
