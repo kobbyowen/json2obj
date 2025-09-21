@@ -56,7 +56,7 @@ class TestJSONObjectMapper(unittest.TestCase):
         _ = m.profile
         self.assertIn("profile", m.to_dict())
         m.profile.settings = {"theme": "dark"}
-        self.assertEqual(m.get_path("profile.settings.theme"), "dark")
+        self.assertEqual(m.profile.settings.theme, "dark")
 
     def test_default_factory_readonly(self):
         m = JSONObjectMapper({}, default_factory=dict, autocreate_missing=True, readonly=True)

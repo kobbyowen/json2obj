@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 import json
 from typing import (
@@ -64,7 +62,7 @@ class JSONObjectMapper:
         return json.dumps(self.__json, indent=indent, sort_keys=sort_keys)
 
     @classmethod
-    def from_json(cls, s: str | bytes | bytearray, *, readonly: bool = False) -> JSONObjectMapper:
+    def from_json(cls, s: str | bytes | bytearray, *, readonly: bool = False) -> "JSONObjectMapper":
         return cls(s, readonly=readonly)
 
     def readonly(self) -> bool:
@@ -176,7 +174,7 @@ class JSONObjectMapper:
                 return default
         return cur
 
-    def set_path(self, path: str, value: Any, *, create_parents: bool = True) -> JSONObjectMapper:
+    def set_path(self, path: str, value: Any, *, create_parents: bool = True) -> "JSONObjectMapper":
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
         toks = parse_path_tokens(path)
@@ -190,7 +188,7 @@ class JSONObjectMapper:
             cur = ensure_next(cur, tok, peek_is_index(toks, i), create_parents, path)
         return self
 
-    def del_path(self, path: str, *, raise_on_missing: bool = False) -> JSONObjectMapper:
+    def del_path(self, path: str, *, raise_on_missing: bool = False) -> "JSONObjectMapper":
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
         toks = parse_path_tokens(path)
@@ -204,7 +202,7 @@ class JSONObjectMapper:
 
     # --------------------------------- merge ----------------------------------
 
-    def merge(self, other: Mapping[str, Any]) -> JSONObjectMapper:
+    def merge(self, other: Mapping[str, Any]) -> "JSONObjectMapper":
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
         if not isinstance(self.__json, dict):
