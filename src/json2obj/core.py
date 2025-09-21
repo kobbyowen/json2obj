@@ -9,6 +9,8 @@ from typing import (
     List,
     Mapping,
     MutableMapping,
+    Optional,
+    Tuple,
     Union,
 )
 
@@ -34,10 +36,10 @@ class JSONObjectMapper:
 
     def __init__(
         self,
-        data: (str | bytes | bytearray | Mapping[str, Any] | MutableMapping[str, Any] | list[Any]),
+        data: Union[str, bytes, bytearray, Mapping[str, Any], MutableMapping[str, Any], List[Any]],
         *,
         readonly: bool = False,
-        default_factory: Callable[[], Any] | None = None,
+        default_factory: Optional[Callable[[], Any]] = None,
         autocreate_missing: bool = False,
         _no_copy: bool = False,
     ) -> None:
@@ -58,11 +60,11 @@ class JSONObjectMapper:
     def to_dict(self) -> Any:
         return copy.deepcopy(self.__json)
 
-    def to_json(self, *, indent: int | None = None, sort_keys: bool = False) -> str:
+    def to_json(self, *, indent: Optional[int] = None, sort_keys: bool = False) -> str:
         return json.dumps(self.__json, indent=indent, sort_keys=sort_keys)
 
     @classmethod
-    def from_json(cls, s: str | bytes | bytearray, *, readonly: bool = False) -> "JSONObjectMapper":
+    def from_json(cls, s: Union[str, bytes, bytearray], *, readonly: bool = False) -> "JSONObjectMapper":
         return cls(s, readonly=readonly)
 
     def readonly(self) -> bool:
@@ -119,14 +121,14 @@ class JSONObjectMapper:
 
     # ----------------------------- mapping access -----------------------------
 
-    def __getitem__(self, key: int | str) -> Any:
+    def __getitem__(self, key: Union[int, str]) -> Any:
         try:
             value = self.__json[key]  # type: ignore[index]
         except Exception as e:
             raise KeyError(key) from e
         return self._wrap(value)
 
-    def __setitem__(self, key: int | str, value: Any) -> None:
+    def __setitem__(self, key: Union[int, str], value: Any) -> None:
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
         self.__json[key] = value  # type: ignore[index]
@@ -137,7 +139,7 @@ class JSONObjectMapper:
     def __len__(self) -> int:
         return len(self.__json)
 
-    def get(self, key: str | int, default: Any = None) -> Any:
+    def get(self, key: Union[str, int], default: Any = None) -> Any:
         try:
             value = self.__json[key]  # type: ignore[index]
         except Exception:
@@ -149,7 +151,7 @@ class JSONObjectMapper:
             return self.__json.keys()
         raise TypeError("keys() only valid for dict roots")
 
-    def items(self) -> Iterable[tuple[Any, Any]]:
+    def items(self) -> Iterable[Tuple[Any, Any]]:
         if isinstance(self.__json, dict):
             return ((k, self._wrap(v)) for k, v in self.__json.items())
         raise TypeError("items() only valid for dict roots")

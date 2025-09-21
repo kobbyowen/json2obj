@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import re
-from typing import Any, Callable
+from typing import Any, Callable, List, Optional
 
 
 def is_identifier(key: str) -> bool:
@@ -17,7 +15,7 @@ PATH_TOKEN = re.compile(
 )
 
 
-def ensure_list_length(lst: list, index: int) -> None:
+def ensure_list_length(lst: List[Any], index: int) -> None:
     if index >= len(lst):
         lst.extend([None] * (index + 1 - len(lst)))
 
@@ -26,11 +24,11 @@ def parse_path_tokens(path: str):
     return list(PATH_TOKEN.finditer(path.replace(".", " ")))
 
 
-def is_last(i: int, toks: list) -> bool:
+def is_last(i: int, toks: List[Any]) -> bool:
     return i == len(toks) - 1
 
 
-def peek_is_index(toks: list, i: int) -> bool:
+def peek_is_index(toks: List[Any], i: int) -> bool:
     return toks[i + 1].group("index") is not None
 
 
@@ -88,7 +86,7 @@ def ensure_next(container: Any, token, next_is_index: bool, create_parents: bool
     return container[i]
 
 
-def traverse_parent(root: Any, toks: list, path: str, strict: bool):
+def traverse_parent(root: Any, toks: List[Any], path: str, strict: bool):
     cur = root
     for _, tok in enumerate(toks[:-1]):
         try:
@@ -121,7 +119,7 @@ def delete_on_parent(parent: Any, last_token, strict: bool):
 def wrap_value(
     value: Any,
     readonly: bool,
-    default_factory: Callable[[], Any] | None,
+    default_factory: Optional[Callable[[], Any]],
     autocreate_missing: bool,
     factory_object: type,
 ) -> Any:
