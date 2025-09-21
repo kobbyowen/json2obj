@@ -64,7 +64,9 @@ class JSONObjectMapper:
         return json.dumps(self.__json, indent=indent, sort_keys=sort_keys)
 
     @classmethod
-    def from_json(cls, json_string: Union[str, bytes, bytearray], *, readonly: bool = False) -> "JSONObjectMapper":
+    def from_json(
+        cls, json_string: Union[str, bytes, bytearray], *, readonly: bool = False
+    ) -> "JSONObjectMapper":
         return cls(json_string, readonly=readonly)
 
     def readonly(self) -> bool:
@@ -101,7 +103,9 @@ class JSONObjectMapper:
         readonly_flag = object.__getattribute__(self, "_JSONObjectMapper__readonly")
         default_factory = object.__getattribute__(self, "_JSONObjectMapper__default_factory")
         autocreate_flag = object.__getattribute__(self, "_JSONObjectMapper__autocreate_missing")
-        return wrap_value(value, readonly_flag, default_factory, autocreate_flag, factory_object=self.__class__)
+        return wrap_value(
+            value, readonly_flag, default_factory, autocreate_flag, factory_object=self.__class__
+        )
 
     def __setattr__(self, attribute_name: str, value: Any) -> None:
         if attribute_name in {
@@ -187,7 +191,9 @@ class JSONObjectMapper:
             if is_last(index, tokens):
                 assign_at(current, token, value, create_parents, path)
                 return self
-            current = ensure_next(current, token, peek_is_index(tokens, index), create_parents, path)
+            current = ensure_next(
+                current, token, peek_is_index(tokens, index), create_parents, path
+            )
         return self
 
     def del_path(self, path: str, *, raise_on_missing: bool = False) -> "JSONObjectMapper":
