@@ -24,83 +24,83 @@ def parse_path_tokens(path: str):
     return list(PATH_TOKEN.finditer(path.replace(".", " ")))
 
 
-def is_last(i: int, toks: List[Any]) -> bool:
-    return i == len(toks) - 1
+def is_last(current_index: int, tokens: List[Any]) -> bool:
+    return current_index == len(tokens) - 1
 
 
-def peek_is_index(toks: List[Any], i: int) -> bool:
-    return toks[i + 1].group("index") is not None
+def peek_is_index(tokens: List[Any], current_index: int) -> bool:
+    return tokens[current_index + 1].group("index") is not None
 
 
-def expect_dict(obj: Any, ctx: str):
+def expect_dict(obj: Any, context: str):
     if not isinstance(obj, dict):
-        raise TypeError(f"Expected dict {ctx}")
+        raise TypeError(f"Expected dict {context}")
 
 
-def expect_list(obj: Any, ctx: str):
+def expect_list(obj: Any, context: str):
     if not isinstance(obj, list):
-        raise TypeError(f"Expected list {ctx}")
+        raise TypeError(f"Expected list {context}")
 
 
 def get_token_value(container: Any, token):
-    name, idx = token.group("name"), token.group("index")
+    name, index = token.group("name"), token.group("index")
     if name is not None:
         expect_dict(container, f"before '{name}'")
         return container[name]
-    expect_list(container, f"before index [{idx}]")
-    return container[int(idx)]
+    expect_list(container, f"before index [{index}]")
+    return container[int(index)]
 
 
 def assign_at(container: Any, token, value: Any, create_parents: bool, path: str):
-    name, idx = token.group("name"), token.group("index")
+    name, index = token.group("name"), token.group("index")
     if name is not None:
         expect_dict(container, f"in '{path}'")
         container[name] = value
         return
     expect_list(container, f"in '{path}'")
-    i = int(idx)
-    if i >= len(container) and not create_parents:
-        raise IndexError(f"Index {i} out of range in '{path}'")
-    ensure_list_length(container, i)
-    container[i] = value
+    index_int = int(index)
+    if index_int >= len(container) and not create_parents:
+        raise IndexError(f"Index {index_int} out of range in '{path}'")
+    ensure_list_length(container, index_int)
+    container[index_int] = value
 
 
 def ensure_next(container: Any, token, next_is_index: bool, create_parents: bool, path: str):
-    name, idx = token.group("name"), token.group("index")
+    name, index = token.group("name"), token.group("index")
     if name is not None:
         expect_dict(container, f"in '{path}'")
-        nxt = container.get(name)
-        if nxt is None:
+        next_value = container.get(name)
+        if next_value is None:
             if not create_parents:
                 raise KeyError(f"Missing key '{name}' in '{path}'")
             container[name] = [] if next_is_index else {}
-            nxt = container[name]
-        return nxt
+            next_value = container[name]
+        return next_value
     expect_list(container, f"in '{path}'")
-    i = int(idx)
-    if i >= len(container):
+    index_int = int(index)
+    if index_int >= len(container):
         if not create_parents:
-            raise IndexError(f"Index {i} out of range in '{path}'")
-        ensure_list_length(container, i)
-        container[i] = [] if next_is_index else {}
-    return container[i]
+            raise IndexError(f"Index {index_int} out of range in '{path}'")
+        ensure_list_length(container, index_int)
+        container[index_int] = [] if next_is_index else {}
+    return container[index_int]
 
 
-def traverse_parent(root: Any, toks: List[Any], path: str, strict: bool):
-    cur = root
-    for _, tok in enumerate(toks[:-1]):
+def traverse_parent(root: Any, tokens: List[Any], path: str, strict: bool):
+    current = root
+    for _, token in enumerate(tokens[:-1]):
         try:
-            cur = get_token_value(cur, tok)
+            current = get_token_value(current, token)
         except Exception:
             if strict:
-                seg = tok.group("name") or f"[{tok.group('index')}]"
-                raise KeyError(f"Missing segment before end at '{seg}' in '{path}'") from None
+                segment = token.group("name") or f"[{token.group('index')}]"
+                raise KeyError(f"Missing segment before end at '{segment}' in '{path}'") from None
             return None
-    return cur
+    return current
 
 
 def delete_on_parent(parent: Any, last_token, strict: bool):
-    name, idx = last_token.group("name"), last_token.group("index")
+    name, index = last_token.group("name"), last_token.group("index")
     if name is not None:
         expect_dict(parent, "for deletion")
         if name in parent:
@@ -109,11 +109,11 @@ def delete_on_parent(parent: Any, last_token, strict: bool):
             raise KeyError(f"Missing key '{name}'")
         return
     expect_list(parent, "for deletion")
-    i = int(idx)
-    if 0 <= i < len(parent):
-        parent.pop(i)
+    index_int = int(index)
+    if 0 <= index_int < len(parent):
+        parent.pop(index_int)
     elif strict:
-        raise IndexError(f"Index {i} out of range")
+        raise IndexError(f"Index {index_int} out of range")
 
 
 def wrap_value(
@@ -134,10 +134,10 @@ def wrap_value(
     if isinstance(value, list):
         return [
             (
-                wrap_value(v, readonly, default_factory, autocreate_missing, factory_object)
-                if isinstance(v, (dict, list))
-                else v
+                wrap_value(item, readonly, default_factory, autocreate_missing, factory_object)
+                if isinstance(item, (dict, list))
+                else item
             )
-            for v in value
+            for item in value
         ]
     return value

@@ -64,68 +64,68 @@ class JSONObjectMapper:
         return json.dumps(self.__json, indent=indent, sort_keys=sort_keys)
 
     @classmethod
-    def from_json(cls, s: Union[str, bytes, bytearray], *, readonly: bool = False) -> "JSONObjectMapper":
-        return cls(s, readonly=readonly)
+    def from_json(cls, json_string: Union[str, bytes, bytearray], *, readonly: bool = False) -> "JSONObjectMapper":
+        return cls(json_string, readonly=readonly)
 
     def readonly(self) -> bool:
         return self.__readonly
 
     # ---------------------------- attribute access ----------------------------
 
-    def __getattr__(self, name: str) -> Any:
+    def __getattr__(self, attribute_name: str) -> Any:
         data = object.__getattribute__(self, "_JSONObjectMapper__json")
         if isinstance(data, list):
-            raise JSONAccessError(f"Cannot access attribute '{name}' on list")
-        if name in type(self).__dict__:
-            return object.__getattribute__(self, name)
-        if not is_identifier(name):
-            raise JSONAccessError(f"'{name}' is not a valid attribute identifier")
+            raise JSONAccessError(f"Cannot access attribute '{attribute_name}' on list")
+        if attribute_name in type(self).__dict__:
+            return object.__getattribute__(self, attribute_name)
+        if not is_identifier(attribute_name):
+            raise JSONAccessError(f"'{attribute_name}' is not a valid attribute identifier")
         try:
-            value = data[name]
-        except KeyError as e:
-            value = self._on_missing_attr(data, name, e)
+            value = data[attribute_name]
+        except KeyError as error:
+            value = self._on_missing_attr(data, attribute_name, error)
         return self._wrap(value)
 
-    def _on_missing_attr(self, data: dict, name: str, err: Exception) -> Any:
+    def _on_missing_attr(self, data: dict, attribute_name: str, error: Exception) -> Any:
         factory = object.__getattribute__(self, "_JSONObjectMapper__default_factory")
-        ro = object.__getattribute__(self, "_JSONObjectMapper__readonly")
-        auto = object.__getattribute__(self, "_JSONObjectMapper__autocreate_missing")
+        readonly_flag = object.__getattribute__(self, "_JSONObjectMapper__readonly")
+        autocreate_flag = object.__getattribute__(self, "_JSONObjectMapper__autocreate_missing")
         if factory is None:
-            raise JSONAccessError(f"'{name}' not found") from err
+            raise JSONAccessError(f"'{attribute_name}' not found") from error
         produced = factory()
-        if auto and not ro:
-            data[name] = produced
+        if autocreate_flag and not readonly_flag:
+            data[attribute_name] = produced
         return produced
 
     def _wrap(self, value: Any) -> Any:
-        ro = object.__getattribute__(self, "_JSONObjectMapper__readonly")
-        fac = object.__getattribute__(self, "_JSONObjectMapper__default_factory")
-        auto = object.__getattribute__(self, "_JSONObjectMapper__autocreate_missing")
-        return wrap_value(value, ro, fac, auto, factory_object=self.__class__)
+        readonly_flag = object.__getattribute__(self, "_JSONObjectMapper__readonly")
+        default_factory = object.__getattribute__(self, "_JSONObjectMapper__default_factory")
+        autocreate_flag = object.__getattribute__(self, "_JSONObjectMapper__autocreate_missing")
+        return wrap_value(value, readonly_flag, default_factory, autocreate_flag, factory_object=self.__class__)
 
-    def __setattr__(self, name: str, value: Any) -> None:
-        if name in {
+    def __setattr__(self, attribute_name: str, value: Any) -> None:
+        if attribute_name in {
             "_JSONObjectMapper__json",
             "_JSONObjectMapper__readonly",
             "_JSONObjectMapper__default_factory",
             "_JSONObjectMapper__autocreate_missing",
         }:
-            return object.__setattr__(self, name, value)
+            return object.__setattr__(self, attribute_name, value)
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
         if isinstance(self.__json, list):
             raise AttributeError("Cannot set attributes on a list")
-        if not is_identifier(name):
-            raise AttributeError(f"'{name}' is not a valid attribute name")
-        self.__json[name] = value
+        if not is_identifier(attribute_name):
+            raise AttributeError(f"'{attribute_name}' is not a valid attribute name")
+        self.__json[attribute_name] = value
 
     # ----------------------------- mapping access -----------------------------
 
     def __getitem__(self, key: Union[int, str]) -> Any:
         try:
             value = self.__json[key]  # type: ignore[index]
-        except Exception as e:
-            raise KeyError(key) from e
+        except Exception as error:
+            raise KeyError(key) from error
         return self._wrap(value)
 
     def __setitem__(self, key: Union[int, str], value: Any) -> None:
@@ -153,53 +153,53 @@ class JSONObjectMapper:
 
     def items(self) -> Iterable[Tuple[Any, Any]]:
         if isinstance(self.__json, dict):
-            return ((k, self._wrap(v)) for k, v in self.__json.items())
+            return ((key, self._wrap(value)) for key, value in self.__json.items())
         raise TypeError("items() only valid for dict roots")
 
     def values(self) -> Iterable[Any]:
         if isinstance(self.__json, dict):
-            return (self._wrap(v) for v in self.__json.values())
+            return (self._wrap(value) for value in self.__json.values())
         raise TypeError("values() only valid for dict roots")
 
     # -------------------------------- path ops --------------------------------
 
     def get_path(self, path: str, default: Any = None) -> Any:
-        cur: Any = self
-        for tok in parse_path_tokens(path):
+        current: Any = self
+        for token in parse_path_tokens(path):
             try:
-                cur = (
-                    getattr(cur, tok.group("name"))
-                    if tok.group("name")
-                    else cur[int(tok.group("index"))]
+                current = (
+                    getattr(current, token.group("name"))
+                    if token.group("name")
+                    else current[int(token.group("index"))]
                 )
             except Exception:
                 return default
-        return cur
+        return current
 
     def set_path(self, path: str, value: Any, *, create_parents: bool = True) -> "JSONObjectMapper":
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
-        toks = parse_path_tokens(path)
-        if not toks:
+        tokens = parse_path_tokens(path)
+        if not tokens:
             raise ValueError("Empty path")
-        cur = self.__json
-        for i, tok in enumerate(toks):
-            if is_last(i, toks):
-                assign_at(cur, tok, value, create_parents, path)
+        current = self.__json
+        for index, token in enumerate(tokens):
+            if is_last(index, tokens):
+                assign_at(current, token, value, create_parents, path)
                 return self
-            cur = ensure_next(cur, tok, peek_is_index(toks, i), create_parents, path)
+            current = ensure_next(current, token, peek_is_index(tokens, index), create_parents, path)
         return self
 
     def del_path(self, path: str, *, raise_on_missing: bool = False) -> "JSONObjectMapper":
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
-        toks = parse_path_tokens(path)
-        if not toks:
+        tokens = parse_path_tokens(path)
+        if not tokens:
             raise ValueError("Empty path")
-        parent = traverse_parent(self.__json, toks, path, raise_on_missing)
+        parent = traverse_parent(self.__json, tokens, path, raise_on_missing)
         if parent is None:
             return self
-        delete_on_parent(parent, toks[-1], raise_on_missing)
+        delete_on_parent(parent, tokens[-1], raise_on_missing)
         return self
 
     # --------------------------------- merge ----------------------------------
@@ -209,6 +209,6 @@ class JSONObjectMapper:
             raise AttributeError("Mapper is read-only")
         if not isinstance(self.__json, dict):
             raise TypeError("merge() requires a dict root")
-        for k, v in other.items():
-            self.__json[k] = v
+        for key, value in other.items():
+            self.__json[key] = value
         return self
