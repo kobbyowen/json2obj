@@ -26,6 +26,7 @@ from .helpers import (
     traverse_parent,
     wrap_value,
 )
+from .query import evaluate_query, evaluate_tokens, tokenize
 
 JSONScalar = Union[str, int, float, bool, None]
 JSONType = Union[JSONScalar, "JSONObjectMapper", List["JSONObjectMapper"], Dict[str, Any]]
@@ -121,7 +122,10 @@ class JSONObjectMapper:
             raise AttributeError("Cannot set attributes on a list")
         if not is_identifier(attribute_name):
             raise AttributeError(f"'{attribute_name}' is not a valid attribute name")
-        self.__json[attribute_name] = value
+        data = self.__json
+        if not isinstance(data, dict):
+            raise AttributeError("Cannot set attributes on a non-dict root")
+        data[attribute_name] = value
 
     # ----------------------------- mapping access -----------------------------
 
@@ -135,7 +139,18 @@ class JSONObjectMapper:
     def __setitem__(self, key: Union[int, str], value: Any) -> None:
         if self.__readonly:
             raise AttributeError("Mapper is read-only")
-        self.__json[key] = value  # type: ignore[index]
+        data = self.__json
+        if isinstance(data, dict):
+            if not isinstance(key, str):
+                raise TypeError("Dict roots require string keys")
+            data[key] = value
+            return
+        if isinstance(data, list):
+            if not isinstance(key, int):
+                raise TypeError("List roots require integer indexes")
+            data[key] = value
+            return
+        raise TypeError("Unsupported root type for item assignment")
 
     def __iter__(self) -> Iterator:
         return iter(self.__json)
@@ -164,6 +179,39 @@ class JSONObjectMapper:
         if isinstance(self.__json, dict):
             return (self._wrap(value) for value in self.__json.values())
         raise TypeError("values() only valid for dict roots")
+
+    # -------------------------------- query ops --------------------------------
+
+    def query(self, expression: str, *, first: bool = False, default: Any = None) -> Any:
+        results = self._evaluate_query(expression)
+        if not results:
+            if default is not None:
+                return default
+            return None if first else []
+        return results[0] if first else results
+
+    def exists(self, expression: str) -> bool:
+        return bool(self._evaluate_query(expression))
+
+    def count(self, expression: str) -> int:
+        return len(self._evaluate_query(expression))
+
+    def compile(self, expression: str):
+        tokens = tokenize(expression)
+
+        def runner(obj: "JSONObjectMapper") -> List[Any]:
+            if not isinstance(obj, JSONObjectMapper):
+                raise TypeError("Compiled query expects a JSONObjectMapper instance")
+            raw_data = object.__getattribute__(obj, "_JSONObjectMapper__json")
+            return evaluate_tokens(raw_data, tokens, obj._wrap)
+
+        return runner
+
+    def _evaluate_query(self, expression: str) -> List[Any]:
+        return evaluate_query(self.__json, expression, self._wrap)
+
+    def _evaluate_tokens(self, tokens: List[Any]) -> List[Any]:
+        return evaluate_tokens(self.__json, tokens, self._wrap)
 
     # -------------------------------- path ops --------------------------------
 

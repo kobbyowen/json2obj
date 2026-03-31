@@ -1,6 +1,8 @@
 import re
 from typing import Any, Callable, List, Optional
 
+from .queryable import QueryableList
+
 
 def is_identifier(key: str) -> bool:
     return bool(re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", key))
@@ -132,12 +134,14 @@ def wrap_value(
             _no_copy=True,
         )
     if isinstance(value, list):
-        return [
-            (
-                wrap_value(item, readonly, default_factory, autocreate_missing, factory_object)
-                if isinstance(item, (dict, list))
-                else item
-            )
-            for item in value
-        ]
+        return QueryableList(
+            [
+                (
+                    wrap_value(item, readonly, default_factory, autocreate_missing, factory_object)
+                    if isinstance(item, (dict, list))
+                    else item
+                )
+                for item in value
+            ]
+        )
     return value

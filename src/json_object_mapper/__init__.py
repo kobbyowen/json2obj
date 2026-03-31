@@ -2,5 +2,6 @@
 
 from .core import JSONObjectMapper
 from .exceptions import JSONAccessError
+from .queryable import QueryableList
 
-__all__ = ["JSONAccessError", "JSONObjectMapper"]
+__all__ = ["JSONAccessError", "JSONObjectMapper", "QueryableList"]

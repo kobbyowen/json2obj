@@ -5,15 +5,17 @@ on:
 
 jobs:
   lint:
-    name: Ruff lint
+    name: Lint and type check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install -U pip ruff
+      - run: python -m pip install -U pip ruff mypy
+      - run: python -m pip install -e .
       - run: ruff check src tests
+      - run: mypy
 
   test:
     name: Unit tests (${{ matrix.python-version }})

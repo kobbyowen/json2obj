@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "json-object-mapper"
-version = "2.0.0"
+version = "2.1.0"
 description = "Attribute-style access wrapper for JSON-like data with dot-path set/delete and safe defaults"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -27,6 +27,9 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+json_object_mapper = ["py.typed"]
+
 [tool.pytest.ini_options]
 addopts = "-q"
 
@@ -46,3 +49,9 @@ per-file-ignores = { "tests/*" = ["PLR2004"] }  # allow magic numbers in tests
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
+
+[tool.mypy]
+python_version = "3.9"
+files = ["src", "tests"]
+mypy_path = "src"
+exclude = '(^build/|^dist/|^venv/|^\.venv/|^\.mypy_cache/|^setup\.py$)'
