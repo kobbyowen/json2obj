@@ -22,11 +22,40 @@ print(obj.to_json(indent=2))
 
 - Attribute-style access (`obj.key`) for dict keys
 - Recursive wrapping for nested dicts and lists
+- Query engine (`query`, `exists`, `count`, `compile`) with wildcard and filter support
+- ORM-like list helpers via `QueryableList` (`filter`, `get`, `first`, `last`, `count`)
 - Read-only mode (immutability enforced)
 - Dot/bracket path lookups (`obj.get_path("a.b[0].c")`)
 - **New:** `set_path()` / `del_path()` for dot paths
 - **New:** `default_factory` + `autocreate_missing` for safe defaults
 - Utility methods: `to_dict`, `to_json`, `from_json`, `merge`
+
+## Release Notes
+
+### v2.1.0
+
+- Renamed import path to `json_object_mapper` and aligned package metadata for the new distribution name.
+- Added JSONPath-like query API:
+  - `obj.query(expression, first=False, default=None)`
+  - `obj.exists(expression)`
+  - `obj.count(expression)`
+  - `obj.compile(expression)`
+- Implemented query features: property access, nested access, list indexing, wildcards, nested wildcard flattening, and basic filters (`==`, `!=`, `>`, `<`, `>=`, `<=`).
+- Isolated query implementation into a dedicated module for maintainability.
+- Added ORM-style list querying through `QueryableList`:
+  - `filter(...)`, `get(...)`, `first()`, `last()`, `count()`
+  - Supports nested field filters such as `profile__age__gt=20`.
+- Expanded test coverage significantly across mapper, query parser, query engine, and queryable list behavior (including deep nested JSON scenarios and edge cases).
+- Added strict type-checking support:
+  - mypy configuration in project metadata
+  - `py.typed` marker for typed package support
+  - type fixes in mapper and queryable helpers
+- CI improvements:
+  - Ruff linting
+  - mypy checks
+  - multi-version unit tests
+  - build and package validation
+- Publishing workflow configured for PyPI release automation.
 
 ## Install
 
@@ -87,6 +116,8 @@ except AttributeError:
 ```bash
 python -m pip install -e .
 python -m unittest discover -s tests -v
+venv/bin/ruff check .
+venv/bin/mypy .
 ```
 
 ## Publishing
