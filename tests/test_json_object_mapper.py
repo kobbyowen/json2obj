@@ -1,6 +1,6 @@
 import unittest
 
-from json2obj import JSONAccessError, JSONObjectMapper
+from json_object_mapper import JSONAccessError, JSONObjectMapper
 
 
 class TestJSONObjectMapper(unittest.TestCase):

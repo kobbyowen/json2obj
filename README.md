@@ -2,12 +2,12 @@
 
 **`json-object-mapper`** is a lightweight Python library that lets you interact with JSON data using **attribute-style access** instead of dictionary keys.
 
-The PyPI distribution is published as `json-object-mapper`. The Python import remains `json2obj` so existing code does not need to change.
+The PyPI distribution is published as `json-object-mapper`.
 
 It turns JSON objects into `JSONObjectMapper` instances that feel natural to use in Python code, while preserving full JSON compatibility.
 
 ```python
-from json2obj import JSONObjectMapper
+from json_object_mapper import JSONObjectMapper
 
 data = {
     "user": {"name": "Kobby", "age": 29, "skills": ["python", "aws", "forex"]}
@@ -37,7 +37,7 @@ pip install json-object-mapper
 ## Usage
 
 ```python
-from json2obj import JSONObjectMapper, JSONAccessError
+from json_object_mapper import JSONObjectMapper, JSONAccessError
 
 # 1) Wrap & read (basic)
 obj = JSONObjectMapper({"user": {"name": "Kobby", "age": 29}})

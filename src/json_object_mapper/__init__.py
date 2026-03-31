@@ -1,4 +1,4 @@
-"""json2obj public interface."""
+"""json_object_mapper public interface."""
 
 from .core import JSONObjectMapper
 from .exceptions import JSONAccessError
