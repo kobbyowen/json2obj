@@ -3,17 +3,29 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "json2obj"
-version = "1.2.0"
+name = "json-object-mapper"
+version = "2.0.0"
 description = "Attribute-style access wrapper for JSON-like data with dot-path set/delete and safe defaults"
 readme = "README.md"
 requires-python = ">=3.8"
-authors = [{name="Refactor Bot"}]
-license = {text="MIT"}
+authors = [{name="Kobby Owen", email="dev@kobbyowen.com"}]
+license = "MIT"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
 ]
+
+[project.urls]
+Homepage = "https://github.com/kobbyowen/json2obj"
+Repository = "https://github.com/kobbyowen/json2obj"
+Issues = "https://github.com/kobbyowen/json2obj/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 addopts = "-q"

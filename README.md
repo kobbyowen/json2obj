@@ -1,6 +1,8 @@
-# json2obj
+# json-object-mapper
 
-**`json2obj`** is a lightweight Python library that lets you interact with JSON data using **attribute-style access** instead of dictionary keys.
+**`json-object-mapper`** is a lightweight Python library that lets you interact with JSON data using **attribute-style access** instead of dictionary keys.
+
+The PyPI distribution is published as `json-object-mapper`. The Python import remains `json2obj` so existing code does not need to change.
 
 It turns JSON objects into `JSONObjectMapper` instances that feel natural to use in Python code, while preserving full JSON compatibility.
 
@@ -29,7 +31,7 @@ print(obj.to_json(indent=2))
 ## Install
 
 ```bash
-pip install json2obj
+pip install json-object-mapper
 ```
 
 ## Usage
@@ -83,8 +85,12 @@ except AttributeError:
 ## Tests
 
 ```bash
-export PYTHONPATH=src
+python -m pip install -e .
 python -m unittest discover -s tests -v
 ```
+
+## Publishing
+
+Publishing is automated with GitHub Actions using PyPI trusted publishing. Create a GitHub release after configuring the `pypi` environment in the repository settings.
 
 MIT License.
