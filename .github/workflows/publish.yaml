@@ -5,17 +5,16 @@ on:
     types: [published]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    environment: pypi
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -25,3 +24,6 @@ jobs:
           python -m build
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
